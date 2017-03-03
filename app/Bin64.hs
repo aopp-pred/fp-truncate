@@ -17,8 +17,8 @@ import Truncate              (makeBin64)
 import Truncate.Main         (btMain)
 import Truncate.Main.Readers (binary)
 
-header :: String
-header = "trbin64 - Truncate 64-bit floating-point numbers represented in binary"
+description :: String
+description = "Truncate 64-bit floating-point numbers represented in binary"
 
 main :: IO ()
-main = btMain binary makeBin64 header
+main = btMain binary makeBin64 description

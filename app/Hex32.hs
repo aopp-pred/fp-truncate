@@ -17,8 +17,8 @@ import Truncate              (makeHex32)
 import Truncate.Main         (btMain)
 import Truncate.Main.Readers (hexadecimal)
 
-header :: String
-header = "trhex32 - Truncate 32-bit floating-point numbers represented in hexadecimal"
+description :: String
+description = "Truncate 32-bit floating-point numbers represented in hexadecimal"
 
 main :: IO ()
-main = btMain hexadecimal makeHex32 header
+main = btMain hexadecimal makeHex32 description
