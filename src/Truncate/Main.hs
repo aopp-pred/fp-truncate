@@ -27,6 +27,7 @@ module Truncate.Main
 
 
 ------------------------------------------------------------------------
+import System.Environment  (getProgName)
 import System.Exit         ( ExitCode(..)
                            , exitWith
                            )
@@ -55,18 +56,22 @@ btMain :: (Show b, Truncatable b)
                       -- program for validating (but not parsing) an input value.
                       -- The 'Tuncate.Main.Readers' module provides readers for
                       -- binary, decimal and hexadecimal inputs.
-    -> (String -> b)  -- ^ A function to generate a 'Truncatable' instance from
+    -> (String -> b)  -- ^ A parser to generate a 'Truncatable' instance from
                       -- a string (e.g., 'makeBin32').
-    -> String         -- ^ A header printed as part of the program help.
+    -> String         -- ^ A short (one line) description of program's purpose.
     -> IO ()
-btMain r f h = btMainWithExitCode r f h >>= exitWith
+btMain reader parser description =
+    btMainWithExitCode reader parser description >>= exitWith
 
 btMainWithExitCode :: (Show b, Truncatable b) =>
     ReadM String -> (String -> b) -> String -> IO ExitCode
-btMainWithExitCode r f h = runProgram =<< execParser programParser
-  where
-    optionParser  = makeParser f r
-    programParser = info (helper <*> optionParser) (header h)
+btMainWithExitCode reader parser description = do
+    prog <- getProgName
+    let optionParser  = makeParser reader parser
+        programParser = info (helper <*> optionParser)
+                             (header $ prog ++ " - " ++ description)
+    options <- execParser programParser
+    runProgram options
 
 runProgram :: (Show a, Truncatable a) => Options a -> IO ExitCode
 runProgram (Options val bs b)
@@ -90,11 +95,11 @@ data Options a = Options { inputValue  :: a
                          }
                deriving (Show)
 
-makeParser :: (a -> b) -> ReadM a -> Parser (Options b)
-makeParser f r = optionParser
+makeParser :: ReadM a -> (a -> b) -> Parser (Options b)
+makeParser reader parser = optionParser
   where
     optionParser = Options <$> valueParser <*> bitsParser <*> baseParser
-    valueParser  = f <$> (argument r (metavar "value"))
+    valueParser  = parser <$> (argument reader (metavar "value"))
     bitsParser   = or12 $ argument auto (metavar "bits")
     baseParser   = option auto (  short 'b'
                                <> long "base"
