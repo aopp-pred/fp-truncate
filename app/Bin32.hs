@@ -15,10 +15,9 @@
 --
 import Truncate              (makeBin32)
 import Truncate.Main         (btMain)
-import Truncate.Main.Readers (binary)
 
 description :: String
 description = "Truncate 32-bit floating-point numbers represented in binary"
 
 main :: IO ()
-main = btMain binary makeBin32 description
+main = btMain makeBin32 description

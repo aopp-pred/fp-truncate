@@ -25,6 +25,7 @@ You can create additional representations by making instances of the
 --
 module Truncate
     ( Truncatable(..)
+    , TParser
     , WordF(..)
     , Binary(..)
     , Decimal(..)
@@ -51,6 +52,7 @@ import Data.Binary.IEEE754 ( wordToFloat
 import Numeric             ( readInt
                            , readHex
                            )
+import Text.Read           (readMaybe)
 
 
 ------------------------------------------------------------------------
@@ -83,6 +85,11 @@ class Truncatable a where
 
 
 -----------------------------------------------------------------------
+-- | A function type for parsing 'Truncatable' types
+type TParser a = String -> Either String a
+
+
+-----------------------------------------------------------------------
 -- | Truncatable floating-point numbers in binary representation.
 data Binary = Bin32 String
             | Bin64 String
@@ -108,17 +115,19 @@ toBin = convert
 
 -- | Create a 'Bin32' from a string. The string should be a sequence of the
 -- characters @0@ and @1@ no longer than 32 characters in length.
-makeBin32 :: String -> Binary
+makeBin32 :: TParser Binary
 makeBin32 s
-  | length s <= 32 && validBin s = Bin32 s
-  | otherwise                    = error $ "invalid 32-bit binary: " ++ s
+  | length s > 32     = Left $ tooManyDigits "binary" 32
+  | (not .validBin) s = Left $ invalidDigits "binary" 32
+  | otherwise         = Right (Bin32 s)
 
 -- | Create a 'Bin64' from a string. The string should be a sequence of the
 -- characters @0@ and @1@ no longer than 64 characters in length.
-makeBin64 :: String -> Binary
+makeBin64 :: TParser Binary
 makeBin64 s
-  | length s <= 64 && validBin s = Bin64 s
-  | otherwise                    = error $ "invalid 64-bit binary: " ++ s
+  | length s > 64     = Left $ tooManyDigits "binary" 64
+  | (not .validBin) s = Left $ invalidDigits "binary" 64
+  | otherwise = Right (Bin64 s)
 
 
 -----------------------------------------------------------------------
@@ -143,13 +152,17 @@ toDec = convert
 
 -- | Create a 'Dec32' from a string. The string can be anything that can be
 -- interpreted as a 32-bit 'Float' by 'read'.
-makeDec32 :: String -> Decimal
-makeDec32 s = Dec32 (read s :: Float)
+makeDec32 :: TParser Decimal
+makeDec32 s = case readMaybe s :: Maybe Float of
+    Just f  -> Right (Dec32 f)
+    Nothing -> Left "Error: value is not a 32-bit decimal number"
 
 -- | Create a 'Dec64' from a string. The string can be anything that can be
 -- interpreted as a 64-bit 'Double' by 'read'.
-makeDec64 :: String -> Decimal
-makeDec64 s = Dec64 (read s :: Double)
+makeDec64 :: TParser Decimal
+makeDec64 s = case readMaybe s :: Maybe Double of
+    Just f  -> Right (Dec64 f)
+    Nothing -> Left  "Error: value is not a 64-bit decimal number"
 
 
 -----------------------------------------------------------------------
@@ -178,14 +191,16 @@ toHex = convert
 
 -- | Create a 'Hex32' from a string. The string should be a sequence of the
 -- valid hexadecimal digits @0-9@ and @a-f@ no longer than 8 characters in length.
-makeHex32 :: String -> Hexadecimal
+makeHex32 :: TParser Hexadecimal
 makeHex32 s
-  | length s <= 8 && validHex s = Hex32 s
-  | otherwise                   = error $ "invalid 32-bit hexadecimal: " ++ s
+  | length s > 8       = Left $ tooManyDigits "hexadecimal" 32
+  | (not . validHex) s = Left $ invalidDigits "hexadecimal" 32
+  | otherwise          = Right (Hex32 s)
 
 -- | Create a 'Hex64' from a string. The string should be a sequence of the
 -- valid hexadecimal digits @0-9@ and @a-f@ no longer than 16 characters in length.
-makeHex64 :: String -> Hexadecimal
+makeHex64 :: TParser Hexadecimal
 makeHex64 s
-  | length s <= 16 && validHex s = Hex64 s
-  | otherwise                    = error $ "invalid 64-bit hexadecimal: " ++ s
+  | length s > 16      = Left $ tooManyDigits "hexadecimal" 64
+  | (not . validHex) s = Left $ invalidDigits "hexadecimal" 64
+  | otherwise          = Right (Hex64 s)
