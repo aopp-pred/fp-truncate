@@ -23,7 +23,6 @@ library
     hs-source-dirs:      src
     exposed-modules:     Truncate
                        , Truncate.Main
-                       , Truncate.Main.Readers
                        , Truncate.Internal
     build-depends:       base >= 4.7 && < 5
                        , data-binary-ieee754
@@ -88,6 +87,9 @@ test-suite fp-truncate-test
                        , Truncate.Test.Truncatable.FromBits
                        , Truncate.Test.Truncatable.MakeBits
                        , Truncate.Test.Truncatable.Operator
+                       , Truncate.Test.Binary
+                       , Truncate.Test.Decimal
+                       , Truncate.Test.Hexadecimal
                        , Truncate.Internal.Test.TruncateWord
                        , Test.Truncate.Arbitrary
     build-depends:       base

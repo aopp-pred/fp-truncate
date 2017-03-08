@@ -15,10 +15,9 @@
 --
 import Truncate              (makeHex64)
 import Truncate.Main         (btMain)
-import Truncate.Main.Readers (hexadecimal)
 
 description :: String
 description = "Truncate 64-bit floating-point numbers represented in hexadecimal"
 
 main :: IO ()
-main = btMain hexadecimal makeHex64 description
+main = btMain makeHex64 description

@@ -25,6 +25,9 @@ import qualified Truncate.Test.Truncatable.FromBits
 import qualified Truncate.Test.Truncatable.MakeBits
 import qualified Truncate.Test.Truncatable.Convert
 import qualified Truncate.Test.Truncatable.Operator
+import qualified Truncate.Test.Binary
+import qualified Truncate.Test.Decimal
+import qualified Truncate.Test.Hexadecimal
 import qualified Truncate.Internal.Test.TruncateWord
 
 
@@ -35,5 +38,8 @@ suites = [ Truncate.Test.Truncatable.FromBits.suite
          , Truncate.Test.Truncatable.MakeBits.suite
          , Truncate.Test.Truncatable.Convert.suite
          , Truncate.Test.Truncatable.Operator.suite
+         , Truncate.Test.Binary.suite
+         , Truncate.Test.Decimal.suite
+         , Truncate.Test.Hexadecimal.suite
          , Truncate.Internal.Test.TruncateWord.suite
          ]

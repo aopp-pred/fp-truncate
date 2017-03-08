@@ -15,10 +15,9 @@
 --
 import Truncate              (makeDec32)
 import Truncate.Main         (btMain)
-import Truncate.Main.Readers (decimal)
 
 description :: String
 description = "Truncate 32-bit floating-point numbers represented in decimal"
 
 main :: IO ()
-main = btMain decimal makeDec32 description
+main = btMain makeDec32 description

@@ -40,6 +40,7 @@ import Options.Applicative
 
 ------------------------------------------------------------------------
 import Truncate            ( Truncatable(..)
+                           , TParser
                            , toBin
                            , toDec
                            , toHex
@@ -52,22 +53,18 @@ import Truncate            ( Truncatable(..)
 -- and print the output to stdout. This function sets the exit code to @0@
 -- on success, and @>0@ otherwise.
 btMain :: (Show b, Truncatable b)
-    => ReadM String   -- ^ A reader for the type of input required by the
-                      -- program for validating (but not parsing) an input value.
-                      -- The 'Tuncate.Main.Readers' module provides readers for
-                      -- binary, decimal and hexadecimal inputs.
-    -> (String -> b)  -- ^ A parser to generate a 'Truncatable' instance from
-                      -- a string (e.g., 'makeBin32').
-    -> String         -- ^ A short (one line) description of program's purpose.
+    => TParser b  -- ^ A parser to generate a 'Truncatable' instance from
+                  -- a string (e.g., 'makeBin32').
+    -> String     -- ^ A short (one line) description of program's purpose.
     -> IO ()
-btMain reader parser description =
-    btMainWithExitCode reader parser description >>= exitWith
+btMain parser description =
+    btMainWithExitCode parser description >>= exitWith
 
 btMainWithExitCode :: (Show b, Truncatable b) =>
-    ReadM String -> (String -> b) -> String -> IO ExitCode
-btMainWithExitCode reader parser description = do
+    TParser b -> String -> IO ExitCode
+btMainWithExitCode parser description = do
     prog <- getProgName
-    let optionParser  = makeParser reader parser
+    let optionParser  = makeParser parser
         programParser = info (helper <*> optionParser)
                              (header $ prog ++ " - " ++ description)
     options <- execParser programParser
@@ -95,11 +92,11 @@ data Options a = Options { inputValue  :: a
                          }
                deriving (Show)
 
-makeParser :: ReadM a -> (a -> b) -> Parser (Options b)
-makeParser reader parser = optionParser
+makeParser :: TParser b -> Parser (Options b)
+makeParser parser = optionParser
   where
     optionParser = Options <$> valueParser <*> bitsParser <*> baseParser
-    valueParser  = parser <$> (argument reader (metavar "value"))
+    valueParser  = argument (eitherReader parser) (metavar "value")
     bitsParser   = or12 $ argument auto (metavar "bits")
     baseParser   = option auto (  short 'b'
                                <> long "base"

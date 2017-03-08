@@ -95,3 +95,23 @@ zeroPad n bs
 
 zeroStrip :: String -> String
 zeroStrip = dropWhile (== '0')
+
+
+------------------------------------------------------------------------
+-- generating error messages for 'TParser' functions
+
+tooManyDigits :: String -> Int -> String
+tooManyDigits name size = errmsg name size "too many digits"
+
+invalidDigits :: String -> Int -> String
+invalidDigits name size = errmsg name size "invalid digits"
+
+errmsg :: String -> Int -> String -> String
+errmsg name size reason = mconcat [ "Error: value is not a "
+                                  , (show size)
+                                  , "-bit "
+                                  , name
+                                  , " number ("
+                                  , reason
+                                  , ")"
+                                  ]
