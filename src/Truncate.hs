@@ -43,14 +43,10 @@ module Truncate
 
 
 ------------------------------------------------------------------------
-import Data.Char           (digitToInt)
 import Data.Binary.IEEE754 ( wordToFloat
                            , floatToWord
                            , wordToDouble
                            , doubleToWord
-                           )
-import Numeric             ( readInt
-                           , readHex
                            )
 import Text.Read           (readMaybe)
 
@@ -95,8 +91,8 @@ data Binary = Bin32 String
             | Bin64 String
 
 instance Truncatable Binary where
-    makeBits (Bin32 b)   = WordF32 $ fst (head (readInt 2 (`elem` "01") digitToInt b))
-    makeBits (Bin64 b)   = WordF64 $ fst (head (readInt 2 (`elem` "01") digitToInt b))
+    makeBits (Bin32 b)   = WordF32 $ binToWord b
+    makeBits (Bin64 b)   = WordF64 $ binToWord b
     fromBits (WordF32 b) = Bin32 (wordToBin b)
     fromBits (WordF64 b) = Bin64 (wordToBin b)
 
@@ -171,8 +167,8 @@ data Hexadecimal = Hex32 String
                  | Hex64 String
 
 instance Truncatable Hexadecimal where
-    makeBits (Hex32 s)   = WordF32 $ fst (head (readHex s))
-    makeBits (Hex64 s)   = WordF64 $ fst (head (readHex s))
+    makeBits (Hex32 s)   = WordF32 $ hexToWord s
+    makeBits (Hex64 s)   = WordF64 $ hexToWord s
     fromBits (WordF32 b) = Hex32 (wordToHex b)
     fromBits (WordF64 b) = Hex64 (wordToHex b)
 
