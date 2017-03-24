@@ -29,15 +29,20 @@ module Truncate.Internal where
 ------------------------------------------------------------------------
 import Data.Bits
 import Data.Word
-import Data.Char (intToDigit)
-import Numeric   (showIntAtBase)
+import Data.Char ( digitToInt
+                 , intToDigit
+                 )
+import Numeric   ( readInt
+                 , readHex
+                 , showIntAtBase
+                 )
 
 
 ------------------------------------------------------------------------
 -- | A wrapper around 'Word32' and 'Word64' types
 data WordF = WordF32 Word32
-         | WordF64 Word64
-         deriving (Eq, Show)
+           | WordF64 Word64
+           deriving (Eq, Show)
 
 
 ------------------------------------------------------------------------
@@ -69,6 +74,9 @@ dropBits n = (flip shiftL) n . (flip shiftR) n
 -----------------------------------------------------------------------
 -- Functions for handling binary representations
 
+binToWord :: Num a => String -> a
+binToWord b = fst $ head $ readInt 2 (`elem` "01") digitToInt b
+
 wordToBin :: (Show a, Integral a) => a -> String
 wordToBin b = showIntAtBase 2 intToDigit b ""
 
@@ -77,6 +85,9 @@ validBin = all (`elem` "01")
 
 -----------------------------------------------------------------------
 -- Functions for handling hexadecimal representations
+
+hexToWord :: (Num a, Eq a) => String -> a
+hexToWord s = fst (head (readHex s))
 
 wordToHex :: (Show a, Integral a) => a -> String
 wordToHex b = showIntAtBase 16 intToDigit b ""
